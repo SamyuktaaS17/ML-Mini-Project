@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Automobile Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 40px;
+            background-color: #f4f4f4;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+        }
+        img {
+            margin-top: 20px;
+            max-width: 80%;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+        }
+        #submitBtn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #submitBtn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Upload Image for Automobile Detection</h1>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="imageInput" name="image" accept="image/*" required><br>
+        <button type="submit" id="submitBtn">Detect Vehicle</button>
+    </form>
+
+    <div id="resultContainer">
+        <h3 id="resultMessage"></h3>
+        <img id="resultImage" src="" alt="Detected image will appear here" style="display:none;">
+    </div>
+
+    <script>
+        const form = document.getElementById("uploadForm");
+        const resultImage = document.getElementById("resultImage");
+        const resultMessage = document.getElementById("resultMessage");
+
+        form.addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById("imageInput");
+            if (!fileInput.files.length) return;
+
+            const formData = new FormData();
+            formData.append("image", fileInput.files[0]);
+
+            resultMessage.innerText = "Processing...";
+            resultImage.style.display = "none";
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const data = await response.json();
+                
+                if (data.image_path) {
+                    resultImage.src = data.image_path;
+                    resultImage.style.display = "block";
+                    resultMessage.innerText = "Detection Complete!";
+                } else {
+                    resultMessage.innerText = "Error: Image path not returned.";
+                }
+            } catch (err) {
+                resultMessage.innerText = "An error occurred: " + err.message;
+            }
+        });
+    </script>
+</body>
+</html>
